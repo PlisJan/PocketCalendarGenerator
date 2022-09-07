@@ -131,16 +131,23 @@ lessons = lessons.split("\n\n")
 for i in range(0, len(lessons)):
     lessons[i] = lessons[i].split("\n")
 
+
 filesToMerge = []
 
+# Initialize currentWeek
 currentWeek = startDate
 
+# Calculate how many weeks to generate
 weeksToGenerate = int((endDate-startDate).days/7)+2
 
-
+# For each week
 for i in tqdm(range(1, weeksToGenerate), "Generating week pages"):
+
+    # Create calendar week and append filename to the list
     filesToMerge.append(createCalendarWeek(
         baseSvg, formatWeekDate(currentWeek), lessons, i))
+
+    # Next week
     currentWeek += timedelta(days=7)
 
 

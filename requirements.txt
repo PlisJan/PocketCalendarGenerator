@@ -1,1 +1,2 @@
 PyPdf2
+tqdm

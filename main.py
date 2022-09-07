@@ -1,9 +1,36 @@
 # You need to have Inkscape installed
 # @author Jan Plischke
 
+import locale
 import os
 import shutil
+from datetime import date, timedelta
+
+from dateutil import parser
 from PyPDF2 import PdfFileMerger
+from tqdm import tqdm
+
+# Ask for start and end date and convert it to a date object
+startDate = parser.parse(
+    input("Start date (e.g. 22.5.22): "), dayfirst=True)
+endDate = parser.parse(
+    input("End date (e.g. 22.5.22): "), dayfirst=True)
+
+# Ask for the lessons file name
+lessonsFilename = input(
+    "lessons file (Standard: lessons.txt): ") or "lessons.txt"
+
+# Ask for the outout filename
+outputFilename = input("Filename: (Standard: Calendar.pdf)") or "Calendar.pdf"
+
+# Ask for the locale
+DATE_LOCALE = input("Locale (Standard: de_DE.UTF-8): ") or "de_DE.UTF-8"
+
+# Try to set locale
+try:
+    locale.setlocale(locale.LC_TIME, DATE_LOCALE)
+except:
+    print("Cannot set locale! Continue with default locale. If you want to use your locale please check if it is correctly installed!")
 
 
 def createCalendarWeek(baseSvg: str, date: str, lessons: list, pageNum: int, filenamePrefix="Week"):
@@ -12,13 +39,13 @@ def createCalendarWeek(baseSvg: str, date: str, lessons: list, pageNum: int, fil
         Parameters:
                 baseSvg (str): The read BaseSvg.svg file
                 date (str): The date of the week (e.g. 1.1. - 7.1. Januar 2022)
-                lessons (list): A 7x6 Matrix with the subject for each lesson 
+                lessons (list): A 7x6 Matrix with the subject for each lesson
                 pageNum (int): A number for naming the current week
-                fileNamePrefix (str): Filename is mad of 'tmp/' + filenamePrefix + pageNup + '.pdf' 
+                fileNamePrefix (str): Filename is mad of 'tmp/' + filenamePrefix + pageNup + '.pdf'
 
         Returns:
                 path (str): relative path of the created file
-                    '''
+    '''
 
     # Replace the 'Date' placehholder with to date
     newSvg = baseSvg.replace(">Date<", f">{date}<")
@@ -53,34 +80,69 @@ def createCalendarWeek(baseSvg: str, date: str, lessons: list, pageNum: int, fil
     return f"tmp/{filenamePrefix}{pageNum}.pdf"
 
 
-# Clears/ creates tmp folder
+def formatWeekDate(startDate: date, weekLength=4):
+    ''' Return the formatted date range like "25. - 29. April 2022" or "29. Apr - 02. März 2022"
+
+    Parameters:
+            startDate (date): The first day of the week
+            weekLength (int): How many days are shown in the week (e.g. 4 (workweek) or 6 (week))
+
+    Returns:
+            formattedDate (str): The formatted date range
+    '''
+    # Get the month in long form
+    month = startDate.strftime("%B")
+    # Get the two digit string representation from the first and the last day of the week
+    monday = startDate.strftime('%d')
+    friday = (startDate+timedelta(days=weekLength)).strftime("%d")
+
+    # Check if whole the week is within a month
+    if (int(monday) < int(friday)):
+        # Return formatted string (e.g. "25. - 29. April 2022")
+        return f"{monday}. - {friday}. {month} {startDate.year}"
+    else:
+        # Get the month of the first day in short form
+        month = startDate.strftime("%b")
+        # Get the month of the last day in long form
+        fridayMonth = (startDate+timedelta(days=weekLength)
+                       ).strftime("%B")
+        # Return formatted string (e.g. "29. Apr. - 02. März 2022")
+        return f"{monday}. {month}. - {friday}. {fridayMonth} {startDate.year}"
+
+
+# Clear/ create tmp folder
 if os.path.exists("./tmp"):
     shutil.rmtree("./tmp")
 os.mkdir("./tmp")
 
 
 # Read BaseSvg File
-f = open("BaseSvg.svg", "r")
-baseSvg = f.read()
-f.close()
+with open("BaseSvg.svg", "r") as f:
+    baseSvg = f.read()
+    f.close()
 
+# Read lessons file
+with open(lessonsFilename, "r") as f:
+    lessons = f.read()
+    f.close()
 
-lessons = [["kR", "kR", "F", "F", "D", "D", "ITG"],
-           ["M", "M", "E", "E", "BK", "BK", " "],
-           ["Mu", "Mu", "D", "D", "E", "E", " "],
-           ["Ek", "Nw", "M", "M", "F", "F", "INS"],
-           ["Nw", "Nw", "Sp", "Klt", "Swi", "Swi", " "],
-           ["N", "O", "T", "I", "Z", "E", "N"]]
-
+# split lessons into a 2d matrix
+lessons = lessons.split("\n\n")
+for i in range(0, len(lessons)):
+    lessons[i] = lessons[i].split("\n")
 
 filesToMerge = []
 
-filesToMerge.append(createCalendarWeek(
-    baseSvg, "04. - 08. August 2022", lessons, 1))
-filesToMerge.append(createCalendarWeek(
-    baseSvg, "10. - 14. August 2022", lessons, 2))
-filesToMerge.append(createCalendarWeek(
-    baseSvg, "16. - 20. August 2022", lessons, 3))
+currentWeek = startDate
+
+weeksToGenerate = int((endDate-startDate).days/7)+2
+
+
+for i in tqdm(range(1, weeksToGenerate), "Generating week pages"):
+    filesToMerge.append(createCalendarWeek(
+        baseSvg, formatWeekDate(currentWeek), lessons, i))
+    currentWeek += timedelta(days=7)
+
 
 # Create the PdfFileMerger class for merging the weeks to one calendar pdf
 merger = PdfFileMerger()
@@ -91,7 +153,8 @@ for pdf_file in filesToMerge:
     merger.append(pdf_file)
 
 # Write out the merged PDF
-merger.write("Calendar.pdf")
+print("Merging single pages to one file")
+merger.write(outputFilename)
 merger.close()
 
 # Remove the tmp directory and all its contents

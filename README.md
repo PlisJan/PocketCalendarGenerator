@@ -6,6 +6,12 @@ Tool to create a Pocket Calendar (optimized for A6)
 </p>
 
 ## Usage
+
+**You need to have [Inkscape](https://inkscape.org/) installed.**
+
+### Install python packages
+`pip install -r requirements.txt`
+
 ### Modify lessons.txt
 Format: 
 ```

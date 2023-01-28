@@ -7,7 +7,7 @@ import shutil
 from datetime import date, timedelta
 
 from dateutil import parser
-from PyPDF2 import PdfFileMerger
+from PyPDF2 import PdfMerger
 from tqdm import tqdm
 
 # Ask for start and end date and convert it to a date object
@@ -21,7 +21,7 @@ lessonsFilename = input(
     "lessons file (Standard: lessons.txt): ") or "lessons.txt"
 
 # Ask for the outout filename
-outputFilename = input("Filename: (Standard: Calendar.pdf)") or "Calendar.pdf"
+outputFilename = input("Filename (Standard: Calendar.pdf): ") or "Calendar.pdf"
 
 # Ask for the locale
 DATE_LOCALE = input("Locale (Standard: de_DE.UTF-8): ") or "de_DE.UTF-8"
@@ -152,7 +152,7 @@ for i in tqdm(range(1, weeksToGenerate), "Generating week pages"):
 
 
 # Create the PdfFileMerger class for merging the weeks to one calendar pdf
-merger = PdfFileMerger()
+merger = PdfMerger()
 
 # Iterate over the list of file names
 for pdf_file in filesToMerge:

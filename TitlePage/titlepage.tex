@@ -1,0 +1,31 @@
+\documentclass[12pt,titlepage]{report}
+\usepackage[a6paper,margin=5mm]{geometry}
+\usepackage{graphicx}
+\usepackage{lmodern}
+\usepackage{titling}
+
+
+\title{Hausaufgabenheft}
+\author{Max Mustermann}
+
+\begin{document}
+{\fontfamily{lmss}\selectfont
+\begin{titlepage}
+	\centering
+	\vspace*{-2mm}
+	{\scshape \begin{figure}[h]
+			\centering
+			\includegraphics[width=0.4\textwidth,height=0.2\textheight, keepaspectratio]{images/logo.png}
+		\end{figure} \par}
+	{\Large\bfseries \thetitle\par}
+	\vfill
+	{\scshape \begin{figure}[h]
+			\centering
+			\includegraphics[width=\textwidth,height=0.42\textheight, keepaspectratio]{images/lessons.png}
+		\end{figure} \par}
+	\vfill
+	{\large\bfseries von\par \theauthor\par}
+	\vfill
+	\vspace*{5mm}
+\end{titlepage}}
+\end{document}

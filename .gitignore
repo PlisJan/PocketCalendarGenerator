@@ -1,3 +1,10 @@
 **/__pycache__
 **/tmp
 **/Calendar.pdf
+**/*.aux
+**/*.fdb_latexmk
+**/*.synctex.*
+**/*.fls
+**/TitlePage/*.log
+**/TitlePage/*.pdf
+**/TitlePage/images/*

@@ -10,6 +10,27 @@ from dateutil import parser
 from PyPDF2 import PdfMerger
 from tqdm import tqdm
 
+
+def askForFile(inputPrompt: str, expectedFileFormat: str, allowNull: bool) -> str:
+    while True:
+        fileName = input(inputPrompt) or None
+        if fileName == None:
+            if allowNull:
+                return ""
+            else:
+                print("You have to enter a filename, please try again")
+                continue
+        else:
+            fileNameSplitted = os.path.splitext(fileName)
+            if not os.path.exists(titlepage):
+                print("This file does not exist, please enter another one")
+            elif fileNameSplitted[len(fileNameSplitted-1)].replace(".", "") != expectedFileFormat.replace(".", ""):
+                print(
+                    "The file has to be a "+expectedFileFormat.replace(".", "")+" file, please enter a file with the correct format!")
+            else:
+                return fileName
+
+
 # Ask for start and end date and convert it to a date object
 startDate = parser.parse(
     input("Start date (e.g. 22.5.22): "), dayfirst=True)
@@ -31,6 +52,13 @@ try:
     locale.setlocale(locale.LC_TIME, DATE_LOCALE)
 except:
     print("Cannot set locale! Continue with default locale. If you want to use your locale please check if it is correctly installed!")
+
+# Ask for the titlepage
+titlepage = askForFile("Titlepage (Standard: empty): ", "pdf", True)
+
+
+# Ask if it should be converted to a booklet
+bookformat = input("Outputformat ( normal | booklet ): ") or "normal"
 
 
 def createCalendarWeek(baseSvg: str, date: str, lessons: list, pageNum: int, filenamePrefix="Week"):
@@ -133,6 +161,9 @@ for i in range(0, len(lessons)):
 
 
 filesToMerge = []
+
+if (titlepage != ""):
+    filesToMerge.append(titlepage)
 
 # Initialize currentWeek
 currentWeek = startDate

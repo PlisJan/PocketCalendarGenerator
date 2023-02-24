@@ -5,10 +5,13 @@ import locale
 import os
 import shutil
 from datetime import date, timedelta
+import subprocess
 
 from dateutil import parser
 from PyPDF2 import PdfMerger
 from tqdm import tqdm
+
+from bookletCreator import *
 
 
 def askForFile(inputPrompt: str, expectedFileFormat: str, allowNull: bool) -> str:
@@ -22,9 +25,9 @@ def askForFile(inputPrompt: str, expectedFileFormat: str, allowNull: bool) -> st
                 continue
         else:
             fileNameSplitted = os.path.splitext(fileName)
-            if not os.path.exists(titlepage):
+            if not os.path.exists(fileName):
                 print("This file does not exist, please enter another one")
-            elif fileNameSplitted[len(fileNameSplitted-1)].replace(".", "") != expectedFileFormat.replace(".", ""):
+            elif fileNameSplitted[len(fileNameSplitted)-1].replace(".", "") != expectedFileFormat.replace(".", ""):
                 print(
                     "The file has to be a "+expectedFileFormat.replace(".", "")+" file, please enter a file with the correct format!")
             else:
@@ -55,10 +58,6 @@ except:
 
 # Ask for the titlepage
 titlepage = askForFile("Titlepage (Standard: empty): ", "pdf", True)
-
-
-# Ask if it should be converted to a booklet
-bookformat = input("Outputformat ( normal | booklet ): ") or "normal"
 
 
 def createCalendarWeek(baseSvg: str, date: str, lessons: list, pageNum: int, filenamePrefix="Week"):
@@ -98,8 +97,8 @@ def createCalendarWeek(baseSvg: str, date: str, lessons: list, pageNum: int, fil
         f.close()
 
     # Convert the created svg file to a pdf file using Inkscape CLI
-    os.system(
-        f'inkscape --export-type="pdf" --export-filename="tmp/Week{pageNum}.pdf" ./tmp/CurrentPage.svg')
+    subprocess.run(
+        f'inkscape --export-type="pdf" --export-filename="tmp/Week{pageNum}.pdf" ./tmp/CurrentPage.svg >/dev/null 2>&1', shell=True, stderr=subprocess.STDOUT)
 
     # Remove temporary svg file
     os.remove("./tmp/CurrentPage.svg")
@@ -194,6 +193,27 @@ for pdf_file in filesToMerge:
 print("Merging single pages to one file")
 merger.write(outputFilename)
 merger.close()
+
+# Creating output filenames
+splittedOutputFilename = outputFilename.split(".")
+bookletFilename = "".join(
+    splittedOutputFilename[:-1])+"_booklet."+splittedOutputFilename[-1]
+
+largeBookletFilename = "".join(
+    splittedOutputFilename[:-1])+"_booklet_large_paper."+splittedOutputFilename[-1]
+
+print("Creating booklet...")
+filePages = readPages(outputFilename)
+convertedPages = createBooklet(filePages)
+
+writePages(bookletFilename, convertedPages)
+
+
+print("Creating booklet on larger paper...")
+
+largePages = createBookletUsingLargeFormat(filePages)
+
+writePages(largeBookletFilename, largePages)
 
 # Remove the tmp directory and all its contents
 shutil.rmtree("./tmp")

@@ -1,0 +1,7 @@
+**/output
+images/*
+!images/dummyLogo.png
+!images/dummyImage.png
+**/build
+lessons[!.]*
+**/variante0.*

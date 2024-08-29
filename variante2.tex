@@ -1,0 +1,157 @@
+% week number
+\newcounter{schoolWeek}
+\setcounter{schoolWeek}{1}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[6pt]{scrbook}
+\renewcommand*{\pagemark}{}% remove page number
+
+% page margin
+\usepackage[a6paper,margin=5mm]{geometry}
+
+% german week day names
+\usepackage[ngerman]{babel}
+\usepackage[ngerman]{translator}
+
+% calendar and bookmark
+\usepackage{tikz}
+\usetikzlibrary{calendar}
+\usetikzlibrary{positioning}
+\usetikzlibrary{calc}
+
+
+\usepackage{colortbl} % colors
+\usepackage{lmodern} % modern font
+\usepackage{graphicx}
+\usepackage{titling} % for creating titlepage
+
+\usepackage{fontspec}
+\setmainfont{Forte} % SELECT FONT
+
+\input{lessons.tex} % import customizable data
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% column height
+\newlength{\rowHeight}
+\setlength{\rowHeight}{4.5mm}
+
+\newlength{\topSpacing}
+\setlength{\topSpacing}{5.5mm}
+
+% colors
+\colorlet{lightLineColor}{gray!80}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% ACTUAL DESIGN %%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand\emptypage{\clearpage\thispagestyle{empty}\hfill}
+
+\newcommand\topbox[1]{
+	% heading
+	{%
+			\noindent
+			\begin{tikzpicture}
+				\draw[very thick] (0,2.5mm) -- ++(0,2.5mm)-- ++(4em,0);
+				\draw[very thick] (0,-2.5mm) -- ++(0,-2.5mm) -- ++(4em,0);
+				\node[anchor=center]at (\textwidth/2,0) {\Huge\bfseries #1 };
+				\draw[very thick] (\textwidth-4em,5mm) -- ++(4em,0) -- ++(0,-2.5mm);
+				\draw[very thick] (\textwidth-4em,-5mm) -- ++(4em,0) -- ++(0,2.5mm);
+			\end{tikzpicture}
+		}\\[\topSpacing]%
+}
+
+
+\newcommand\tikzWeekDay[2]{%
+	\begin{scope}[auto]
+		% Top Line
+		\draw (5em,\rowHeight) -- (\textwidth-3.5em,\rowHeight);
+		\draw (\textwidth-3em,\rowHeight) -- ++(3em,0) -- ++(0,-0.5em);
+		% Inner elements
+		\foreach \cLesson [count=\i] in #2{
+				\draw[lightLineColor] (0,\i*-\rowHeight+\rowHeight) -- ++(\textwidth-3.5em,0);
+				\draw[lightLineColor] (\textwidth-3em,\i*-\rowHeight+\rowHeight) -- ++(3em,0) -- ++(0,0.5em);
+				\node[anchor=south] at (\textwidth-1.5em,\i*-\rowHeight+\rowHeight) {\Large\bfseries\cLesson};
+			}%
+		% day name
+		\draw[fill=white,draw=none] (0,0.5em) rectangle ++(5em,-3em);
+		\node[anchor=center] at (\rowHeight,0) {\Huge\bfseries #1};
+		% day name corners
+		\draw[thick] (0,\rowHeight) -- ++(4em,0) -- ++(0,-1em);
+		\draw[thick] (0,-\rowHeight) -- ++(4em,0) -- ++(0,1em);
+	\end{scope}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand\weekday[2]{%
+	\begin{tikzpicture}
+		\tikzWeekDay{#1}{#2}
+	\end{tikzpicture}
+}
+
+\newcommand\rightweekday[2]{%
+	\begin{tikzpicture}
+		\begin{scope}[xscale=-1]
+			\tikzWeekDay{#1}{#2}
+		\end{scope}
+	\end{tikzpicture}
+}
+
+
+\newcommand*{\printSundayDate}[1]{%
+	% determine julian day number
+	\newcount\julianday%
+	\pgfcalendardatetojulian{\%y0-\%m0-\%d0}{\julianday}%
+	% compute week day (monday=0, ..., sunday=6)
+	\newcount\julianweekday%
+	\pgfcalendarjuliantoweekday{\julianday}{\julianweekday}%
+	% compute value to add
+	\newcount\toAdd%
+	\pgfmathsetcount{\toAdd}{-\julianweekday + 6}%
+	% compute date of sunday
+	\pgfcalendardatetojulian{\%y0-\%m0-\%d0+\toAdd}{\julianday}%
+	\pgfcalendarjuliantodate{\julianday}{\thisyear}{\thismonth}{\thisday}%
+	% print date
+	\thisday.\thismonth.\thisyear%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\include{titlepage}
+% \fontfamily{lmss}\selectfont
+\let\%=\pgfcalendarshorthand%
+\pgfcalendar{cal}{\firstday}{\lastday}{%
+	\ifdate{Monday,equals=\firstday}{%
+		\newpage
+		% heading
+		\topbox{Woche~\arabic{schoolWeek} - \%d0.\%m0. bis \printSundayDate{\%y0-\%m0-\%d0}}
+		\weekday{\%w.}{\montag}\\[\rowHeight]%
+	}{}%
+	\ifdate{Tuesday}{%
+		\weekday{\%w.}{\dienstag}\\[\rowHeight]%
+	}{}%
+	\ifdate{Wednesday}{%
+		\weekday{\%w.}{\mittwoch}
+	}{}%
+	\ifdate{Thursday}{%
+		\newpage
+		% heading
+		\topbox{~}
+		\stepcounter{schoolWeek}%
+		\rightweekday{\%w.}{\donnerstag}\\[\rowHeight]%
+	}{}%
+	\ifdate{Friday}{%
+		\rightweekday{\%w.}{\freitag}\\[\rowHeight]%
+	}{}%
+	\ifdate{Saturday}{%
+		\rightweekday{}{\wochenende}
+	}{}%
+}%
+\emptypage % Add as many empty pages as you like
+\emptypage
+\end{document}

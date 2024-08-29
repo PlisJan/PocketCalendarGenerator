@@ -1,0 +1,8 @@
+\documentclass[a4paper]{article}
+\usepackage{pdfpages}
+\usepackage{tikz}
+\begin{document}
+\pagestyle{empty}
+\includepdf[pages=-,signature=4,pagecommand={\tikz[overlay,remember picture]
+			\draw[gray,dashed,very thin] (current page.west) -- (current page.east);}]{variante2-buch.pdf}
+\end{document}

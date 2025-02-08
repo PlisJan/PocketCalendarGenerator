@@ -19,7 +19,7 @@
   - Unzip the correct file
   - copy the `geckodriver` file into this directory
 
-# Usage
+## Usage
 - Replace `images/dummyImage.png` with your own image (e.g. your timetable)
   - (Optional, only works if your school is using the "schulportal") run `fetchLessonsFromGmoPortal.py`
 - Replace `images/dummyLogo.png` with your own logo (e.g. your school logo)

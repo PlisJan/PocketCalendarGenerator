@@ -1,4 +1,3 @@
-
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -26,11 +25,16 @@ script = 'document.styleSheets[0].insertRule("td:has(> .stdplan-eintrag) {backgr
 driver.execute_script(script)
 
 elem = driver.find_element(By.CLASS_NAME, "stdplan-table")
-script = "let children=document.getElementsByClassName('stdplan-table')[0].children[1].children;" + \
-    "children[children.length-1].remove();"*(11-MAX_LESSON_NUMBER)
+script = (
+    "let children=document.getElementsByClassName('stdplan-table')[0].children[1].children;"
+    + "children[children.length-1].remove();" * (11 - MAX_LESSON_NUMBER)
+)
 driver.execute_script(script)
-elem.screenshot('images/lessons.png')
+elem.screenshot("images/lessons.png")
 driver.close()
 
 # optional: remove log file  # comment out if you want to keep it
-os.remove("geckodriver.log")
+try:
+    os.remove("geckodriver.log")
+except:
+    pass

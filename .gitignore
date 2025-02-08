@@ -5,3 +5,8 @@ images/*
 **/build
 lessons[!.]*
 **/variante0.*
+.venv
+.build
+geckodriver
+*.ttf
+*.TTF

@@ -20,7 +20,6 @@
 \usetikzlibrary{positioning}
 \usetikzlibrary{calc}
 
-
 \usepackage{colortbl} % colors
 \usepackage{lmodern} % modern font
 \usepackage{graphicx}
@@ -29,8 +28,7 @@
 \usepackage{fontspec}
 \setmainfont{Forte} % SELECT FONT
 
-\input{lessons.tex} % import customizable data
-
+\input{lessonsPia.tex} % import customizable data
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -63,7 +61,6 @@
 			\end{tikzpicture}
 		}\\[\topSpacing]%
 }
-
 
 \newcommand\tikzWeekDay[2]{%
 	\begin{scope}[auto]
@@ -100,7 +97,6 @@
 		\end{scope}
 	\end{tikzpicture}
 }
-
 
 \newcommand*{\printSundayDate}[1]{%
 	% determine julian day number
@@ -153,5 +149,7 @@
 	}{}%
 }%
 \emptypage % Add as many empty pages as you like
+\emptypage
+\emptypage
 \emptypage
 \end{document}

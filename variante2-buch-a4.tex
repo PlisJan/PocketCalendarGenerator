@@ -1,8 +1,87 @@
 \documentclass[a4paper]{article}
 \usepackage{pdfpages}
+\usepackage{graphicx}
+\usepackage{pgffor}
 \usepackage{tikz}
+
+%% Thanks to https://tex.stackexchange.com/questions/394023/how-to-determine-if-a-pdf-page-exists-before-including-it
+
+
+\newcounter{pdfPageCount}
+\newcounter{moduloVal}
+% \usepackage{filecontents}
+% \begin{filecontents*}{\jobname page.pdf}
+% 	%PDF-1.1
+% 	1 0 obj <</Type /Catalog /Pages 2 0 R>>
+% 	endobj
+% 	2 0 obj <</Type /Pages /Kids [3 0 R] /Count 1>>
+% 	endobj
+% 	3 0 obj<</Type /Page /Parent 2 0 R /Resources 4 0 R /MediaBox [0 0 70 50] /Contents 6 0 R>>
+% 	endobj
+% 	4 0 obj<</Font <</F1 5 0 R>>>>
+% 	endobj
+% 	5 0 obj<</Type /Font /Subtype /Type1 /BaseFont /Helvetica>>
+% 	endobj
+% 	6 0 obj
+% 	<</Length 36>>
+% 	stream
+% 	BT /F1 10 Tf 20 20 Td (Page 1)Tj ET
+% 	endstream
+% 	endobj
+% 	xref
+% 	0 9
+% 	0000000000 65535 f
+% 	0000000009 00000 n
+% 	0000000056 00000 n
+% 	0000000111 00000 n
+% 	0000000210 00000 n
+% 	0000000248 00000 n
+% 	0000000315 00000 n
+% 	trailer <</Size 7/Root 1 0 R>>
+% 	startxref
+% 	398
+% 	%%EOF
+% \end{filecontents*}
+
+\makeatletter
+\newcommand{\includepdfifhaspage}[2]{%
+	\begingroup
+	\edef\AM@currentdocname{#1}%
+	\IfFileExists{\AM@currentdocname}{%
+		\AM@getpagecount
+		\global\let\David@temp\AM@pagecount
+		\endgroup
+		\ifnum #2>\z@
+			\setcounter{pdfPageCount}{\David@temp}
+		\else
+			% NO PAGE #2 IN FILE #1\par
+		\fi}%
+	{\endgroup}% file does not exist
+}
+\makeatother
+
+
 \begin{document}
 \pagestyle{empty}
-\includepdf[pages=-,signature=4,pagecommand={\tikz[overlay,remember picture]
-			\draw[gray,dashed,very thin] (current page.west) -- (current page.east);}]{variante2-buch.pdf}
+\includepdfifhaspage{variante2-buch.pdf}{1}
+\setcounter{moduloVal}{\the\numexpr\thepdfPageCount-(\thepdfPageCount/4)*4\relax}
+
+\ifnum \themoduloVal=0
+	\foreach \x in {0,...,\the\numexpr\thepdfPageCount/4-1\relax} {
+			\includepdf[pages={\the\numexpr\x*4+1\relax,\the\numexpr\x*4+3\relax,\the\numexpr\x*4+2\relax,\the\numexpr\x*4+4\relax},nup=1x2,pagecommand={\tikz[overlay,remember picture]
+						\draw[gray,dashed,very thin] (current page.west) -- (current page.east);}]{variante2-buch.pdf}
+		}
+\else
+	\foreach \x in {0,...,\the\numexpr\thepdfPageCount/4-2\relax} {
+			\includepdf[pages={\the\numexpr\x*4+1\relax,\the\numexpr\x*4+3\relax,\the\numexpr\x*4+2\relax,\the\numexpr\x*4+4\relax},nup=1x2,pagecommand={\tikz[overlay,remember picture]
+						\draw[gray,dashed,very thin] (current page.west) -- (current page.east);}]{variante2-buch.pdf}
+		}
+
+	\ifnum \themoduloVal=-2
+		\includepdf[pages={\the\numexpr\thepdfPageCount-1\relax,{},\the\numexpr\thepdfPageCount\relax,{}},nup=1x2,pagecommand={\tikz[overlay,remember picture]
+					\draw[gray,dashed,very thin] (current page.west) -- (current page.east);}]{variante2-buch.pdf}
+	\else
+		\errmessage{Pages should be divisible by 2}
+	\fi
+\fi
 \end{document}
